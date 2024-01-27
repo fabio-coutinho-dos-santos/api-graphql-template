@@ -72,4 +72,6 @@ phases: # can be -> install | pre-build | build | post_build
       # Push Docker image to ECR
       - docker push ${ECR_IMAGE_URI}
 
+      # Deploy to Fargate
+      - aws ecs update-service --cluster api-graphqp-template-fargate-cluster --service svc-api-grapql-template --force-new-deployment
 
