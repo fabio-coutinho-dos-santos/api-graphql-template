@@ -45,15 +45,15 @@ phases: # can be -> install | pre-build | build | post_build
     commands:
     
       - ECR_MAIN_URI="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-      - echo ${ECR_MAIN_URI}
+      # - echo ${ECR_MAIN_URI}
 
-      - echo ${CODEBUILD_RESOLVED_SOURCE_VERSION}
+      # - echo ${CODEBUILD_RESOLVED_SOURCE_VERSION}
 
       - SHORT_COMMIT_HASH=$(echo ${CODEBUILD_RESOLVED_SOURCE_VERSION} | cut -b -8)
-      - echo ${SHORT_COMMIT_HASH}
+      # - echo ${SHORT_COMMIT_HASH}
 
       - ECR_IMAGE_URI="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${SHORT_COMMIT_HASH}"
-      - echo ${ECR_IMAGE_URI}
+      # - echo ${ECR_IMAGE_URI}
 
   # build:
     # commands:
@@ -73,5 +73,5 @@ phases: # can be -> install | pre-build | build | post_build
       - docker push ${ECR_IMAGE_URI}
 
       # Deploy to Fargate
-      - aws ecs update-service --cluster api-graphqp-template-fargate-cluster --service svc-api-grapql-template --force-new-deployment
+      # - aws ecs update-service --cluster api-graphqp-template-fargate-cluster --service svc-api-grapql-template --force-new-deployment
 
