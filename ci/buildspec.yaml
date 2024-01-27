@@ -1,0 +1,71 @@
+# Reference to know the variables created in codebuild process https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
+# to push the image on ECR is necessary give the follow permision to role atached in the cloudbuild project:
+# {
+#   "Version": "2012-10-17",
+#   "Statement": [
+#       {
+#           "Effect": "Allow",  
+#           "Action": [
+#               "ecr:BatchCheckLayerAvailability",
+#               "ecr:CompleteLayerUpload",
+#               "ecr:GetAuthorizationToken",
+#               "ecr:InitiateLayerUpload",
+#               "ecr:PutImage",
+#               "ecr:UploadLayerPart"
+#             ],
+#           "Resource": "*"
+#       }
+#   ]
+# }
+# to apply this permission will need to go to IAM->Roles, select the <cloudbuild-project-role> create a inline permission with the content above
+
+# variables come from CodeBuild project environment
+# ACCOUNT_ID
+# ECR_REPO_NAME
+#==========================================
+
+# variables come from CodeBuild process
+# AWS_REGION
+# CODEBUILD_RESOLVED_SOURCE_VERSION = commit sha complete
+#==========================================
+
+version: 0.2
+
+phases: # can be -> install | pre-build | build | post_build
+
+  install:
+    commands:
+      - npm install
+
+  pre_build:
+    commands:
+    
+      - ECR_MAIN_URI="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+      # - echo ${ECR_MAIN_URI}
+
+      # - echo ${CODEBUILD_RESOLVED_SOURCE_VERSION}
+
+      - SHORT_COMMIT_HASH=$(echo ${CODEBUILD_RESOLVED_SOURCE_VERSION} | cut -b -8)
+      # - echo ${SHORT_COMMIT_HASH}
+
+      - ECR_IMAGE_URI="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${SHORT_COMMIT_HASH}"
+      # - echo ${ECR_IMAGE_URI}
+
+  # build:
+    # commands:
+      # - npm test
+      
+  post_build:
+    commands:
+      - aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_MAIN_URI}
+
+      # Build Docker image
+      - docker build -t ${ECR_REPO_NAME} .
+
+      # Tag Docker image
+      - docker tag ${ECR_REPO_NAME}:latest ${ECR_IMAGE_URI}
+
+      # Push Docker image to ECR
+      - docker push ${ECR_IMAGE_URI}
+
+
