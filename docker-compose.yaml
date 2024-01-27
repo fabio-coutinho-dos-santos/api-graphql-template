@@ -1,0 +1,8 @@
+version: "3.8"
+services:
+  svc-app:
+    build: .
+    container_name: svc-app
+    # command: ["dev"]
+    ports:
+      - 4000:4000
